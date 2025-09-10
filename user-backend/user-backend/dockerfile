@@ -1,0 +1,31 @@
+# ---------------------------
+# Stage 1: Build JAR bằng Gradle
+# ---------------------------
+FROM eclipse-temurin:21-jdk AS build
+
+WORKDIR /app
+
+# Sao chép toàn bộ mã nguồn
+COPY . .
+
+# Đảm bảo wrapper có quyền thực thi (tránh lỗi khi copy từ Windows)
+RUN chmod +x ./gradlew
+
+# Build JAR Spring Boot
+RUN ./gradlew clean bootJar --no-daemon
+
+# ---------------------------
+# Stage 2: Run ứng dụng
+# ---------------------------
+FROM eclipse-temurin:21-jre
+
+WORKDIR /app
+
+# Copy JAR từ stage build
+COPY --from=build /app/build/libs/*.jar app.jar
+
+# Mở port 8080
+EXPOSE 8080
+
+# Chạy app
+ENTRYPOINT ["java","-jar","app.jar"]

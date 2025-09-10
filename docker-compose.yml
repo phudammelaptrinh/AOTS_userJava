@@ -1,0 +1,30 @@
+version: "3.9"
+
+services:
+  # =========================
+  # Frontend (React/Next.js)
+  # =========================
+  frontend:
+    build: ./user-frontend          # Thư mục Dockerfile của frontend
+    ports:
+      - "3000:3000"                 # Khai báo port frontend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8080/api   # URL gọi API (dùng tên service backend)
+    depends_on:
+      - backend
+
+  # =========================
+  # Backend (Spring Boot)
+  # =========================
+  backend:
+    build: user-backend/user-backend           # Thư mục Dockerfile của backend
+    ports:
+      - "8080:8080"                 # Khai báo port backend
+    environment:
+      # Kết nối PostgreSQL chạy ở MÁY LOCAL
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://host.docker.internal:5432/tmdt
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+    # Nếu chạy trên Linux, mở comment dòng dưới để map host.docker.internal
+    # extra_hosts:
+    #   - "host.docker.internal:host-gateway"
